@@ -1,5 +1,8 @@
 package metaModel;
 
+import metaModel.visiteur.MinispecElement;
+import metaModel.visiteur.Visitor;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +13,8 @@ public class Model implements MinispecElement {
 	public Model () {
 		this.entities = new ArrayList<>();
 	}
-	
+
+	@Override
 	public void accept(Visitor v) {
 		v.visitModel(this);
 	}

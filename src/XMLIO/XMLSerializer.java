@@ -11,21 +11,24 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import metaModel.Attribute;
 import metaModel.Entity;
 import metaModel.Model;
-import metaModel.Visitor;
+import metaModel.visiteur.Visitor;
 
-public class XMLSerializer extends Visitor {
+public class XMLSerializer implements Visitor {
 	List<Element> elements;
 	Element root = null;
 	String modelId;
 	Integer counter;
 	Document doc;
-	
+
+	String currentEntityId = null;
+
 	Document result() {
 		return this.doc;
 	}
-	
+
 	public XMLSerializer() throws ParserConfigurationException {
 		this.elements = new ArrayList<>();
 		this.counter = 0;
@@ -35,14 +38,14 @@ public class XMLSerializer extends Visitor {
 		root = this.doc.createElement("Root");
 		this.doc.appendChild(root);
 	}
-	
+
 	private void addIdToElement(Element e) {
 		this.counter++;
 		Attr attr = this.doc.createAttribute("id");
 		attr.setValue("#" + this.counter.toString());
 		e.setAttributeNode(attr);
 	}
-	
+
 	private void maybeUpdateRootFrom(Element e) {
 		String rootId = this.root.getAttribute("model");
 		if (rootId.isEmpty()) {
@@ -55,33 +58,61 @@ public class XMLSerializer extends Visitor {
 
 	@Override
 	public void visitEntity(Entity e) {
-		super.visitEntity(e);
 		Element elem = this.doc.createElement("Entity");
 		this.addIdToElement(elem);
+
+		this.currentEntityId = elem.getAttribute("id");
+
 		Attr attr = doc.createAttribute("model");
 		attr.setValue(modelId);
 		elem.setAttributeNode(attr);
 
+		Attr attrName = doc.createAttribute("name");
+		attrName.setValue(e.getName());
+		elem.setAttributeNode(attrName);
+
 		this.root.appendChild(elem);
-		attr = doc.createAttribute("name");
-		attr.setValue(e.getName().toString());
-		elem.setAttributeNode(attr);
+		elements.add(elem);
+
+		for(Attribute a : e.getAttributes()) {
+			a.accept(this);
+		}
+	}
+
+	@Override
+	public void visitAttribute(Attribute a) {
+		Element elem = this.doc.createElement("Attribute");
+		this.addIdToElement(elem);
+
+		if (this.currentEntityId != null) {
+			Attr attrEntity = doc.createAttribute("entity");
+			attrEntity.setValue(this.currentEntityId);
+			elem.setAttributeNode(attrEntity);
+		}
+
+		Attr attrName = doc.createAttribute("name");
+		attrName.setValue(a.getName());
+		elem.setAttributeNode(attrName);
+
+		Attr attrType = doc.createAttribute("type");
+		attrType.setValue(a.getType());
+		elem.setAttributeNode(attrType);
+
 		this.root.appendChild(elem);
 		elements.add(elem);
 	}
-	
+
 	@Override
 	public void visitModel(Model e) {
-		super.visitModel(e);
 		Element elem = this.doc.createElement("Model");
 		this.addIdToElement(elem);
 		this.maybeUpdateRootFrom(elem);
+
 		this.root.appendChild(elem);
 		elements.add(elem);
+
 		for (Entity n : e.getEntities()) {
 			n.accept(this);
 		}
 	}
-
-
 }

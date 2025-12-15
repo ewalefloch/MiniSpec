@@ -13,14 +13,14 @@ class XMLAnalyserTest {
 	@Test
 	void test1() {
 		XMLAnalyser analyser = new XMLAnalyser();
-		Model model = analyser.getModelFromFilenamed("Exemple1.xml");
+		Model model = analyser.getModelFromFilenamed("./exemple/Exemple1.xml");
 		assertTrue(model != null);
 		assertTrue(model.getEntities().size() == 0);
 	}
 	@Test
 	void test2() {
 		XMLAnalyser analyser = new XMLAnalyser();
-		Model model = analyser.getModelFromFilenamed("Exemple2.xml");
+		Model model = analyser.getModelFromFilenamed("./exemple/Exemple2.xml");
 		assertTrue(model != null);
 		System.out.println(model.getEntities().size());
 		assertTrue(model.getEntities().size() == 2);

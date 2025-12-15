@@ -1,8 +1,5 @@
 package prettyPrinter;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
 
 import XMLIO.XMLAnalyser;
@@ -13,7 +10,16 @@ class PrettyPrinterTest {
 	@Test
 	void test() {
 		XMLAnalyser analyser = new XMLAnalyser();
-		Model model = analyser.getModelFromFilenamed("Exemple2.xml");
+		Model model = analyser.getModelFromFilenamed("./exemple/Exemple2.xml");
+		PrettyPrinter pp = new PrettyPrinter();
+		model.accept(pp);
+		System.out.println(pp.result());
+	}
+
+	@Test
+	void test2() {
+		XMLAnalyser analyser = new XMLAnalyser();
+		Model model = analyser.getModelFromFilenamed("./exemple/Exemple3.xml");
 		PrettyPrinter pp = new PrettyPrinter();
 		model.accept(pp);
 		System.out.println(pp.result());

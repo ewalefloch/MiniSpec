@@ -1,6 +1,8 @@
 package XMLIO;
 
 import javax.xml.parsers.*;
+
+import metaModel.visiteur.MinispecElement;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -29,14 +31,40 @@ public class XMLAnalyser {
 	protected Model modelFromElement(Element e) {
 		return new Model();
 	}
-	
+
 	protected Entity entityFromElement(Element e) {
 		String name = e.getAttribute("name");
 		Entity entity = new Entity();
 		entity.setName(name);
-		Model model = (Model) minispecElementFromXmlElement(this.xmlElementIndex.get(e.getAttribute("model")));
-		model.addEntity(entity);
+
+		if (e.hasAttribute("model")) {
+			String modelId = e.getAttribute("model");
+			if (this.xmlElementIndex.containsKey(modelId)) {
+				MinispecElement parent = minispecElementFromXmlElement(this.xmlElementIndex.get(modelId));
+				if (parent instanceof Model) {
+					((Model) parent).addEntity(entity);
+				}
+			}
+		}
 		return entity;
+	}
+
+	protected Attribute attributeFromElement(Element e) {
+		Attribute attr = new Attribute();
+		attr.setName(e.getAttribute("name"));
+		attr.setType(e.getAttribute("type"));
+
+		if (e.hasAttribute("entity")) {
+			String entityId = e.getAttribute("entity");
+
+			if (this.xmlElementIndex.containsKey(entityId)) {
+				MinispecElement parent = minispecElementFromXmlElement(this.xmlElementIndex.get(entityId));
+				if (parent instanceof Entity) {
+					((Entity) parent).addAttribute(attr);
+				}
+			}
+		}
+		return attr;
 	}
 
 	protected MinispecElement minispecElementFromXmlElement(Element e) {
@@ -44,11 +72,12 @@ public class XMLAnalyser {
 		MinispecElement result = this.minispecIndex.get(id);
 		if (result != null) return result;
 		String tag = e.getTagName();
-		if (tag.equals("Model")) {
-			result = modelFromElement(e);
-		} else  {
-			result = entityFromElement(e);
-		} 
+        result = switch (tag) {
+            case "Model" -> modelFromElement(e);
+            case "Entity" -> entityFromElement(e);
+            case "Attribute" -> attributeFromElement(e);
+            default -> result;
+        };
 		this.minispecIndex.put(id, result);
 		return result;
 	}

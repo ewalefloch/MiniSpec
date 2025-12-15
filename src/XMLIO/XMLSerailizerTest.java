@@ -37,7 +37,7 @@ class XMLSerailizerTest {
 		transformer = tFactory.newTransformer();
 
 		DOMSource source = new DOMSource(document);
-		Result result = new StreamResult(new File("exemple0-out.xml"));
+		Result result = new StreamResult(new File("./exemple/exemple0-out.xml"));
 		transformer.transform(source, result);
 	}
 
@@ -57,7 +57,7 @@ class XMLSerailizerTest {
 		transformer = tFactory.newTransformer();
 
 		DOMSource source = new DOMSource(document);
-		Result result = new StreamResult(new File("exemple3-out.xml"));
+		Result result = new StreamResult(new File("./exemple/exemple0bis-out.xml"));
 		transformer.transform(source, result);
 	}
 	
@@ -76,7 +76,7 @@ class XMLSerailizerTest {
 	@Test
 	void test3() throws ParserConfigurationException, TransformerException {
 		XMLAnalyser analyser = new XMLAnalyser();
-		Model model = analyser.getModelFromFilenamed("Exemple1.xml");
+		Model model = analyser.getModelFromFilenamed("./exemple/Exemple1.xml");
 		XMLSerializer serializer = new XMLSerializer();
 		model.accept(serializer);
 		Document document = serializer.result();
@@ -84,14 +84,14 @@ class XMLSerailizerTest {
 		Transformer transformer = tFactory.newTransformer();
 
 		DOMSource source = new DOMSource(document);
-		Result result = new StreamResult(new File("exemple1-out.xml"));
+		Result result = new StreamResult(new File("./exemple/exemple1-out.xml"));
 		transformer.transform(source, result);
 	}
 	
 	@Test
 	void test4() throws ParserConfigurationException, TransformerException {
 		XMLAnalyser analyser = new XMLAnalyser();
-		Model model = analyser.getModelFromFilenamed("Exemple2.xml");
+		Model model = analyser.getModelFromFilenamed("./exemple/Exemple2.xml");
 		XMLSerializer serializer = new XMLSerializer();
 		model.accept(serializer);
 		Document document = serializer.result();
@@ -99,7 +99,22 @@ class XMLSerailizerTest {
 		Transformer transformer = tFactory.newTransformer();
 
 		DOMSource source = new DOMSource(document);
-		Result result = new StreamResult(new File("exemple2-out.xml"));
+		Result result = new StreamResult(new File("./exemple/exemple2-out.xml"));
+		transformer.transform(source, result);
+	}
+
+	@Test
+	void test5() throws ParserConfigurationException, TransformerException {
+		XMLAnalyser analyser = new XMLAnalyser();
+		Model model = analyser.getModelFromFilenamed("./exemple/Exemple3.xml");
+		XMLSerializer serializer = new XMLSerializer();
+		model.accept(serializer);
+		Document document = serializer.result();
+		TransformerFactory tFactory = TransformerFactory.newInstance();
+		Transformer transformer = tFactory.newTransformer();
+
+		DOMSource source = new DOMSource(document);
+		Result result = new StreamResult(new File("./exemple/exemple3-out.xml"));
 		transformer.transform(source, result);
 	}
 
