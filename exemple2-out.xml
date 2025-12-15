@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Root model="#1">
+	<Model id="#1" />
+	<Entity id="#2" model="#1" name="Balise" />
+	<Entity id="#3" model="#1" name="Satellite" />
+</Root>
