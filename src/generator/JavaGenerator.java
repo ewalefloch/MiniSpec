@@ -46,7 +46,11 @@ public class JavaGenerator implements Visitor {
             bufferCode.append(bufferImport).append("\n");
         }
 
-        bufferCode.append("public class ").append(e.getName()).append(" {\n\n");
+        bufferCode.append("public class ").append(e.getName());
+        if (e.getSuperEntity() != null) {
+            bufferCode.append(" extends ").append(e.getSuperEntity().getName());
+        }
+        bufferCode.append(" {\n\n");
         bufferCode.append(bufferAttributes);
         bufferCode.append("\n    public ").append(e.getName()).append("() { }\n");
         bufferCode.append(bufferGetSet);
@@ -103,7 +107,6 @@ public class JavaGenerator implements Visitor {
         bufferAttributes.append(">");
     }
 
-    // CELLE QUI MANQUAIT
     @Override
     public void visitCollectionType(CollectionType t) {
         addImport("java.util.Collection");

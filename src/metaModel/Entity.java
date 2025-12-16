@@ -8,7 +8,8 @@ import java.util.List;
 
 public class Entity implements MinispecElement {
 	private String name;
-	private List<Attribute> attributes;
+	private final List<Attribute> attributes;
+	private Entity superEntity;
 
 	public Entity(){
 		attributes = new ArrayList<Attribute>();
@@ -35,4 +36,11 @@ public class Entity implements MinispecElement {
 		this.attributes.add(a);
 	}
 
+	public Entity getSuperEntity(){
+		return superEntity;
+	}
+
+	public void setSuperEntity(Entity superEntity){
+		this.superEntity = superEntity;
+	}
 }
