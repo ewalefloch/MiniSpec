@@ -1,6 +1,8 @@
-package generator;
+package generator.test;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import generator.JavaGenerator;
 import org.junit.jupiter.api.Test;
 
 import XMLIO.XMLAnalyser;
@@ -8,8 +10,13 @@ import metaModel.Model;
 
 class JavaGeneratorTest {
 
-    private generation.FileGenerator fileGenerator = new generation.FileGenerator();
-
+    private final generation.FileGenerator fileGenerator = new generation.FileGenerator();
+    private final StringBuilder file = new StringBuilder("<Root model=\"#1\">\n" +
+            "    <Model id=\"#1\" />\n" +
+            "    <Entity id=\"#2\" model=\"#1\" name=\"Satellite\" />\n" +
+            "    <Attribute id=\"#3\" entity=\"#2\" name=\"nom\" type=\"String\" />\n" +
+            "    <Attribute id=\"#4\" entity=\"#2\" name=\"id\" type=\"Integer\" />\n" +
+            "</Root>");
     /**
      * Teste la génération d'une seule entité simple (Satellite)
      * Correspond à l'exemple de la Figure 5 du PDF.
@@ -18,7 +25,7 @@ class JavaGeneratorTest {
     void testSatelliteGeneration() {
 
         XMLAnalyser analyser = new XMLAnalyser();
-        Model model = analyser.getModelFromFilenamed("./exemple/Exemple3.xml");
+        Model model = analyser.getModelFromString(file.toString());
 
         assertNotNull(model);
         assertEquals(1, model.getEntities().size());

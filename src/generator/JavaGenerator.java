@@ -6,8 +6,8 @@ import metaModel.Model;
 import metaModel.visiteur.Visitor;
 
 public class JavaGenerator implements Visitor {
-    private StringBuilder buffer = new StringBuilder();
-    private StringBuilder bufferGetSet = new StringBuilder();
+    private final StringBuilder buffer = new StringBuilder();
+    private final StringBuilder bufferGetSet = new StringBuilder();
     public String getCode() {
         return buffer.toString();
     }
