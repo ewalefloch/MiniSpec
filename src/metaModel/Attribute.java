@@ -1,17 +1,18 @@
 package metaModel;
 
+import metaModel.type.Type;
 import metaModel.visiteur.MinispecElement;
 import metaModel.visiteur.Visitor;
 
 public class Attribute implements MinispecElement {
     private String name;
-    private String type;
+    private Type type;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public Type getType() { return type; }
+    public void setType(Type type) { this.type = type; }
 
     @Override
     public void accept(Visitor v) {

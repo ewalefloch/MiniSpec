@@ -1,8 +1,10 @@
 public class Flotte {
+
     public String nom;
     public Integer numero;
 
     public Flotte() { }
+
     public String getNom() {
         return this.nom;
     }
@@ -18,6 +20,5 @@ public class Flotte {
     public void setNumero(Integer numero) {
         this.numero = numero;
     }
-
 }
 

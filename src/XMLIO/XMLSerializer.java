@@ -7,6 +7,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import metaModel.type.ArrayType;
+import metaModel.type.ResolvedReference;
+import metaModel.type.SimpleType;
+import metaModel.type.UnresolvedReference;
+import metaModel.type.collection.BagType;
+import metaModel.type.collection.CollectionType;
+import metaModel.type.collection.ListType;
+import metaModel.type.collection.SetType;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -95,11 +103,51 @@ public class XMLSerializer implements Visitor {
 		elem.setAttributeNode(attrName);
 
 		Attr attrType = doc.createAttribute("type");
-		attrType.setValue(a.getType());
+		attrType.setValue(a.getType().getName());
 		elem.setAttributeNode(attrType);
 
 		this.root.appendChild(elem);
 		elements.add(elem);
+	}
+
+	@Override
+	public void visitSimpleType(SimpleType t) {
+
+	}
+
+	@Override
+	public void visitCollectionType(CollectionType t) {
+
+	}
+
+	@Override
+	public void visitArrayType(ArrayType t) {
+
+	}
+
+	@Override
+	public void visitListType(ListType t) {
+
+	}
+
+	@Override
+	public void visitSetType(SetType t) {
+
+	}
+
+	@Override
+	public void visitBagType(BagType t) {
+
+	}
+
+	@Override
+	public void visitResolvedReference(ResolvedReference t) {
+
+	}
+
+	@Override
+	public void visitUnresolvedReference(UnresolvedReference t) {
+
 	}
 
 	@Override

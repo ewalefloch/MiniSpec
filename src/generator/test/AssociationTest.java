@@ -1,6 +1,8 @@
-package generator;
+package generator.test;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import generator.JavaGenerator;
 import org.junit.jupiter.api.Test;
 import XMLIO.XMLAnalyser;
 import metaModel.Model;
@@ -9,7 +11,7 @@ class AssociationTest {
 
     private final generation.FileGenerator fileGenerator = new generation.FileGenerator();
 
-    private StringBuilder file = new StringBuilder("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" +
+    private final StringBuilder file = new StringBuilder("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" +
             "<Root model=\"#1\">\n" +
             "    <Model id=\"#1\" />\n" +
             "\n" +

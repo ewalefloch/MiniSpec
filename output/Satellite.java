@@ -1,8 +1,10 @@
 public class Satellite {
+
     public String nom;
-    public Integer id;
+    public Flotte parent;
 
     public Satellite() { }
+
     public String getNom() {
         return this.nom;
     }
@@ -11,13 +13,12 @@ public class Satellite {
         this.nom = nom;
     }
 
-    public Integer getId() {
-        return this.id;
+    public Flotte getParent() {
+        return this.parent;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setParent(Flotte parent) {
+        this.parent = parent;
     }
-
 }
 

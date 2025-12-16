@@ -4,8 +4,6 @@ import javax.xml.parsers.*;
 
 import metaModel.visiteur.MinispecElement;
 import org.w3c.dom.*;
-import org.xml.sax.*;
-
 
 import metaModel.*;
 import metaModel.Entity;
@@ -14,18 +12,47 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import metaModel.type.*;
+import metaModel.type.collection.*;
+
 public class XMLAnalyser {
 
-	// Les clés des 2 Map sont les id 
-	
-	// Map des instances de la syntaxe abstraite (metamodel)
 	protected Map<String, MinispecElement> minispecIndex;
-	// Map des elements XML
 	protected Map<String, Element> xmlElementIndex;
 
 	public XMLAnalyser() {
-		this.minispecIndex = new HashMap<String, MinispecElement>();
-		this.xmlElementIndex = new HashMap<String, Element>();
+		this.minispecIndex = new HashMap<>();
+		this.xmlElementIndex = new HashMap<>();
+	}
+
+	/**
+	 * Méthode intelligente pour résoudre un type à partir d'une chaîne (ID ou Nom).
+	 */
+	private Type resolveType(String typeStr) {
+		if (typeStr == null || typeStr.isEmpty()) return null;
+
+		if (this.xmlElementIndex.containsKey(typeStr)) {
+			MinispecElement elem = minispecElementFromXmlElement(this.xmlElementIndex.get(typeStr));
+
+			if (elem instanceof Type) {
+				return (Type) elem;
+			} else if (elem instanceof Entity) {
+				return new ResolvedReference((Entity) elem);
+			}
+		}
+
+
+		if (isBaseType(typeStr)) {
+			return new SimpleType(typeStr);
+		}
+
+		return new UnresolvedReference(typeStr);
+	}
+
+	private boolean isBaseType(String name) {
+		return "String".equalsIgnoreCase(name) || "Integer".equalsIgnoreCase(name) ||
+				"Boolean".equalsIgnoreCase(name) || "Float".equalsIgnoreCase(name) ||
+				"Double".equalsIgnoreCase(name);
 	}
 
 	protected Model modelFromElement(Element e) {
@@ -38,64 +65,118 @@ public class XMLAnalyser {
 		entity.setName(name);
 
 		if (e.hasAttribute("model")) {
-			String modelId = e.getAttribute("model");
-			if (this.xmlElementIndex.containsKey(modelId)) {
-				MinispecElement parent = minispecElementFromXmlElement(this.xmlElementIndex.get(modelId));
-				if (parent instanceof Model) {
-					((Model) parent).addEntity(entity);
-				}
+			MinispecElement elem = minispecElementFromXmlElement(this.xmlElementIndex.get(e.getAttribute("model")));
+			if (elem instanceof Model) {
+				((Model) elem).addEntity(entity);
 			}
 		}
 		return entity;
 	}
 
 	protected Attribute attributeFromElement(Element e) {
-		Attribute attr = new Attribute();
-		attr.setName(e.getAttribute("name"));
-		attr.setType(e.getAttribute("type"));
+		String name = e.getAttribute("name");
+		String typeStr = e.getAttribute("type");
 
+		Entity entity = (Entity) minispecElementFromXmlElement(this.xmlElementIndex.get(e.getAttribute("entity")));
+
+		Attribute attribute = new Attribute();
+		attribute.setName(name);
+
+		Type type = resolveType(typeStr);
+		attribute.setType(type);
+
+		if (entity != null) {
+			entity.addAttribute(attribute);
+		}
+		return attribute;
+	}
+
+	protected SimpleType simpleTypeFromElement(Element e) {
+		String name = e.getAttribute("name");
+		return new SimpleType(name);
+	}
+
+	private ReferenceType referenceFromElement(Element e) {
 		if (e.hasAttribute("entity")) {
 			String entityId = e.getAttribute("entity");
-
-			if (this.xmlElementIndex.containsKey(entityId)) {
-				MinispecElement parent = minispecElementFromXmlElement(this.xmlElementIndex.get(entityId));
-				if (parent instanceof Entity) {
-					((Entity) parent).addAttribute(attr);
-				}
+			MinispecElement elem = minispecElementFromXmlElement(this.xmlElementIndex.get(entityId));
+			if (elem instanceof Entity) {
+				return new ResolvedReference((Entity) elem);
 			}
 		}
-		return attr;
+		String targetName = e.getAttribute("name");
+		return new UnresolvedReference(targetName);
+	}
+
+	private Type collectionFromElement(Element e) {
+		String name = e.getAttribute("name"); // "Array", "List", "Set"...
+
+		String typeStr = e.getAttribute("type");
+		if (typeStr == null || typeStr.isEmpty()) typeStr = e.getAttribute("of");
+
+		Type baseType = resolveType(typeStr);
+
+		Integer min = parseInteger(e.getAttribute("min"));
+		Integer max = parseInteger(e.getAttribute("max"));
+		Integer size = parseInteger(e.getAttribute("size"));
+
+		if ("Array".equalsIgnoreCase(name)) {
+			return new ArrayType(size != null ? size : 0, baseType);
+		}
+		else if ("Set".equalsIgnoreCase(name)) {
+			return new SetType(min, max, baseType);
+		}
+		else if ("Bag".equalsIgnoreCase(name)) {
+			return new BagType(min, max, baseType);
+		}
+		else {
+			return new ListType(min, max, baseType);
+		}
 	}
 
 	protected MinispecElement minispecElementFromXmlElement(Element e) {
 		String id = e.getAttribute("id");
-		MinispecElement result = this.minispecIndex.get(id);
-		if (result != null) return result;
+		if (minispecIndex.containsKey(id)) return minispecIndex.get(id);
+
 		String tag = e.getTagName();
-        result = switch (tag) {
-            case "Model" -> modelFromElement(e);
-            case "Entity" -> entityFromElement(e);
-            case "Attribute" -> attributeFromElement(e);
-            default -> result;
-        };
-		this.minispecIndex.put(id, result);
+		MinispecElement result = switch (tag) {
+			case "Model" -> modelFromElement(e);
+			case "Entity" -> entityFromElement(e);
+			case "Attribute" -> attributeFromElement(e);
+
+			case "Type", "SimpleType" -> simpleTypeFromElement(e);
+
+			case "Collection" -> collectionFromElement(e);
+			case "Reference" -> referenceFromElement(e);
+			default -> null;
+		};
+
+		if (result != null && !id.isEmpty()) {
+			this.minispecIndex.put(id, result);
+		}
 		return result;
 	}
 
-	// alimentation du map des elements XML
+	// --- Utilitaires de Parsing ---
+
+	private Integer parseInteger(String val){
+		if (val == null || val.isEmpty()) return null;
+		try { return Integer.parseInt(val); } catch (NumberFormatException e) { return null; }
+	}
+
 	protected void firstRound(Element el) {
 		NodeList nodes = el.getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++) {
 			Node n = nodes.item(i);
-			if (n instanceof Element) {
-				Element child = (Element) n;
-				String id = child.getAttribute("id");
-				this.xmlElementIndex.put(id, child);
+			if (n instanceof Element child) {
+                String id = child.getAttribute("id");
+				if (!id.isEmpty()) {
+					this.xmlElementIndex.put(id, child);
+				}
 			}
 		}
 	}
 
-	// alimentation du map des instances de la syntaxe abstraite (metamodel)
 	protected void secondRound(Element el) {
 		NodeList nodes = el.getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++) {
@@ -108,57 +189,38 @@ public class XMLAnalyser {
 
 	public Model getModelFromDocument(Document document) {
 		Element e = document.getDocumentElement();
-		
 		firstRound(e);
-		
 		secondRound(e);
-		
-		Model model = (Model) this.minispecIndex.get(e.getAttribute("model"));
-				
-		return model;
+		return (Model) this.minispecIndex.get(e.getAttribute("model"));
 	}
-	
+
 	public Model getModelFromInputStream(InputStream stream) {
 		try {
-			// création d'une fabrique de documents
 			DocumentBuilderFactory fabrique = DocumentBuilderFactory.newInstance();
-
-			// création d'un constructeur de documents
 			DocumentBuilder constructeur = fabrique.newDocumentBuilder();
 			Document document = constructeur.parse(stream);
 			return getModelFromDocument(document);
-
-		} catch (ParserConfigurationException pce) {
-			System.out.println("Erreur de configuration du parseur DOM");
-			System.out.println("lors de l'appel à fabrique.newDocumentBuilder();");
-		} catch (SAXException se) {
-			System.out.println("Erreur lors du parsing du document");
-			System.out.println("lors de l'appel à construteur.parse(xml)");
-		} catch (IOException ioe) {
-			System.out.println("Erreur d'entrée/sortie");
-			System.out.println("lors de l'appel à construteur.parse(xml)");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
-	
-	public Model getModelFromString(String contents) {		
+
+	public Model getModelFromString(String contents) {
 		InputStream stream = new ByteArrayInputStream(contents.getBytes());
 		return getModelFromInputStream(stream);
 	}
-	
-	public Model getModelFromFile(File file) {		
-		InputStream stream = null;
+
+	public Model getModelFromFile(File file) {
 		try {
-			stream = new FileInputStream(file);
+			return getModelFromInputStream(new FileInputStream(file));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return getModelFromInputStream(stream);
+		return null;
 	}
 
 	public Model getModelFromFilenamed(String filename) {
-			File file = new File(filename);
-			return getModelFromFile(file);
+		return getModelFromFile(new File(filename));
 	}
 }

@@ -17,10 +17,8 @@ class JavaGeneratorTest {
             "    <Attribute id=\"#3\" entity=\"#2\" name=\"nom\" type=\"String\" />\n" +
             "    <Attribute id=\"#4\" entity=\"#2\" name=\"id\" type=\"Integer\" />\n" +
             "</Root>");
-    /**
-     * Teste la génération d'une seule entité simple (Satellite)
-     * Correspond à l'exemple de la Figure 5 du PDF.
-     */
+
+
     @Test
     void testSatelliteGeneration() {
 

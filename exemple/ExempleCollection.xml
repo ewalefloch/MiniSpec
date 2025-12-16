@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Root model="#1">
+    <Model id="#1" />
+
+    <Entity id="#10" model="#1" name="Flotte" />
+    <Entity id="#20" model="#1" name="Satellite" />
+
+    <Reference id="#RefFlotte" entity="#10" />
+
+    <Reference id="#RefStation" name="StationSol" />
+
+    <Collection id="#ListSat" name="List" of="#20" />
+
+    <Collection id="#SetInt" name="Set" of="Integer" />
+
+    <Collection id="#ArrayStation" name="Array" of="#RefStation" size="10" />
+
+    <Attribute id="#A1" entity="#10" name="mesSatellites" type="#ListSat" />
+    <Attribute id="#A2" entity="#10" name="nom" type="String" />
+
+    <Attribute id="#A3" entity="#20" name="codes" type="#SetInt" />
+    <Attribute id="#A4" entity="#20" name="cibles" type="#ArrayStation" />
+    <Attribute id="#A5" entity="#20" name="altitude" type="Integer" />
+    <Attribute id="#A6" entity="#20" name="maFlotte" type="#RefFlotte" />
+</Root>
