@@ -41,15 +41,20 @@ public class XMLAnalyser {
 		return new SimpleType(typeStr);
 	}
 
-	// --- PARSING DES ELEMENTS ---
-
 	protected Model modelFromElement(Element e) {
 		return new Model();
 	}
 
 	protected Entity entityFromElement(Element e) {
+		String id = e.getAttribute("id"); // On récupère l'ID tout de suite
+		String name = e.getAttribute("name");
+
 		Entity entity = new Entity();
-		entity.setName(e.getAttribute("name"));
+		entity.setName(name);
+
+		if (!id.isEmpty()) {
+			this.minispecIndex.put(id, entity);
+		}
 
 		if (e.hasAttribute("extends")) {
 			String superId = e.getAttribute("extends");
@@ -66,9 +71,9 @@ public class XMLAnalyser {
 			MinispecElement model = minispecElementFromXmlElement(this.xmlElementIndex.get(e.getAttribute("model")));
 			if (model instanceof Model) ((Model) model).addEntity(entity);
 		}
+
 		return entity;
 	}
-
 	protected Attribute attributeFromElement(Element e) {
 		Attribute attribute = new Attribute();
 		attribute.setName(e.getAttribute("name"));
