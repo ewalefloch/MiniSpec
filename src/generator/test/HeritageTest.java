@@ -38,7 +38,6 @@ class HeritageTest {
                     "\n" +
                     "</Root>";
 
-    // NOUVEAU : XML de Configuration pour les Packages et Imports
     private final String xmlConfig =
             "<java-code>\n" +
                     "    <model name=\"Machine\" package=\"m2tiil.space\"/>\n" +
@@ -51,7 +50,7 @@ class HeritageTest {
                     "    <primitive name=\"Array\" type=\"Array\" package=\"m2tiil.Array\"/>\n" +
                     "</java-code>";
 
-    // Cas Erreur : Circularité
+    //Erreur
     private final String xmlCircle =
             "<Root model=\"#1\">\n" +
                     "    <Model id=\"#1\" />\n" +

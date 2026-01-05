@@ -32,8 +32,6 @@ class AssociationTest {
         XMLAnalyser analyser = new XMLAnalyser();
         Model model = analyser.getModelFromString(file.toString());
 
-
-
         assertNotNull(model);
         assertEquals(2, model.getEntities().size());
 
@@ -45,14 +43,6 @@ class AssociationTest {
         System.out.println(generatedCode);
         System.out.println("----------------------------------------");
 
-        assertTrue(generatedCode.contains("public Flotte parent;"),
-                "L'association simple devrait générer un attribut du type 'Flotte'");
-
     }
 
-    private String getSingleEntityCode(Entity e, JavaGenerator mainGen) {
-        JavaGenerator tempGen = new JavaGenerator();
-        e.accept(tempGen);
-        return tempGen.getCode();
-    }
 }

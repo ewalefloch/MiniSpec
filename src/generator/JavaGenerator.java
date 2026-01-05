@@ -27,6 +27,8 @@ public class JavaGenerator implements Visitor {
     private final Set<String> currentImports = new HashSet<>();
     private final Set<String> currentInterface = new HashSet<>();
 
+    private boolean isAbstract = false;
+
     public JavaGenerator(JavaConfig config) {
         this.config = config;
     }
@@ -76,7 +78,13 @@ public class JavaGenerator implements Visitor {
             bufferCode.append(bufferImport).append("\n");
         }
 
-        bufferCode.append("public class ").append(e.getName());
+        if (isAbstract){
+            bufferCode.append("public abstract class ");
+        }else {
+            bufferCode.append("public class ");
+        }
+
+        bufferCode.append(e.getName());
         if (e.getSuperEntity() != null) {
             bufferCode.append(" extends ").append(e.getSuperEntity().getName());
         }
@@ -227,11 +235,14 @@ public class JavaGenerator implements Visitor {
         }
         String typeStr = typeGen.bufferAttributes.toString();
         generateInterface(typeStr, methodName);
-        bufferMethods.append("    @Override\n");
-        bufferMethods.append("    public ").append(typeStr).append(" ").append(methodName).append("() {\n");
-        bufferMethods.append("        //TODO\n");
-        bufferMethods.append("        return null;\n");
-        bufferMethods.append("    }\n\n");
+
+        if (!isAbstract){
+            bufferMethods.append("    @Override\n");
+            bufferMethods.append("    public ").append(typeStr).append(" ").append(methodName).append("() {\n");
+            bufferMethods.append("        //TODO\n");
+            bufferMethods.append("        return null;\n");
+            bufferMethods.append("    }\n\n");
+        }
     }
 
     private void generateInterface(String typeStr,String methodName){
@@ -247,5 +258,13 @@ public class JavaGenerator implements Visitor {
         bufferInterfaces.append("public interface ").append(interfaceName).append(" {\n");
         bufferInterfaces.append("    ").append(typeStr).append(" ").append(methodName).append("();\n");
         bufferInterfaces.append("}\n\n");
+    }
+
+    public boolean isAbstract() {
+        return isAbstract;
+    }
+
+    public void setAbstract(boolean anAbstract) {
+        isAbstract = anAbstract;
     }
 }
