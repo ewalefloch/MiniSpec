@@ -15,8 +15,8 @@ class InitialTest {
                     "    <Model id=\"#1\" />\n" +
                     "    <Entity id=\"#2\" model=\"#1\" name=\"Satellite\" />\n" +
                     "    <Attribute id=\"#3\" entity=\"#2\" name=\"nom\" type=\"String\" default=\"&quot;OVNI&quot;\" />\n" +
-                    "    <Attribute id=\"#4\" entity=\"#2\" name=\"numero\" type=\"Integer\" default=\"50\"/>\n" +
-                    "    <Attribute id=\"#5\" entity=\"#2\" name=\"id\" type=\"Integer\" default=\"nextInt()\"/>\n" +
+                    "    <Attribute id=\"#4\" entity=\"#2\" name=\"numero\" type=\"Integer\" default=\"nextInt()\"/>\n" +
+                    "    <Attribute id=\"#5\" entity=\"#2\" name=\"id\" type=\"Integer\" default=\"nextInteger()\"/>\n" +
                     "</Root>");
 
     @Test
@@ -29,7 +29,7 @@ class InitialTest {
         assertEquals(1, model.getEntities().size());
 
         assertEquals("\"OVNI\"", model.getEntities().getFirst().getAttributes().get(0).getInitialValue());
-        assertEquals("50", model.getEntities().getFirst().getAttributes().get(1).getInitialValue());
+        assertEquals("nextInt()", model.getEntities().getFirst().getAttributes().get(1).getInitialValue());
 
         // 2. Génération
         JavaGenerator generator = new JavaGenerator();

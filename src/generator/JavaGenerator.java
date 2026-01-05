@@ -22,8 +22,10 @@ public class JavaGenerator implements Visitor {
     private final StringBuilder bufferGetSet = new StringBuilder();
     private final StringBuilder bufferImport = new StringBuilder();
     private final StringBuilder bufferMethods = new StringBuilder();
-
+    private final StringBuilder bufferImplements = new StringBuilder();
+    private final StringBuilder bufferInterfaces = new StringBuilder();
     private final Set<String> currentImports = new HashSet<>();
+    private final Set<String> currentInterface = new HashSet<>();
 
     public JavaGenerator(JavaConfig config) {
         this.config = config;
@@ -50,6 +52,9 @@ public class JavaGenerator implements Visitor {
         bufferAttributes.setLength(0);
         bufferGetSet.setLength(0);
         bufferImport.setLength(0);
+        bufferImplements.setLength(0);
+        bufferInterfaces.setLength(0);
+        bufferMethods.setLength(0);
 
         for (Attribute a : e.getAttributes()) {
             a.accept(this);
@@ -75,6 +80,9 @@ public class JavaGenerator implements Visitor {
         if (e.getSuperEntity() != null) {
             bufferCode.append(" extends ").append(e.getSuperEntity().getName());
         }
+        if (!bufferImplements.isEmpty()){
+            bufferCode.append(" implements ").append(bufferImplements);
+        }
         bufferCode.append(" {\n\n");
         bufferCode.append(bufferAttributes);
         bufferCode.append("\n    public ").append(e.getName()).append("() { }\n");
@@ -86,6 +94,10 @@ public class JavaGenerator implements Visitor {
         }
 
         bufferCode.append("}\n\n");
+
+        if (!bufferInterfaces.isEmpty()) {
+            bufferCode.append(bufferInterfaces);
+        }
     }
 
     @Override
@@ -101,7 +113,7 @@ public class JavaGenerator implements Visitor {
             String val = e.getInitialValue();
             bufferAttributes.append(" = ").append(val);
             if (val.contains("(") && val.endsWith(")") && !val.trim().startsWith("new ")) {
-                generateStubMethod(e, val);
+                generateMethod(e, val);
             }
         }
         bufferAttributes.append(";\n");
@@ -201,19 +213,39 @@ public class JavaGenerator implements Visitor {
                 .append("    }\n");
     }
 
-    private void generateStubMethod(Attribute a, String callStr) {
+    private void generateMethod(Attribute a, String callStr) {
         String methodName = callStr.substring(0, callStr.indexOf('(')).trim();
+        if (currentInterface.contains(methodName)) {
+            return;
+        }
+
+        currentInterface.add(methodName);
 
         JavaGenerator typeGen = new JavaGenerator(this.config);
         if (a.getType() != null) {
             a.getType().accept(typeGen);
         }
         String typeStr = typeGen.bufferAttributes.toString();
-
-        bufferMethods.append("    private ").append(typeStr).append(" ").append(methodName).append("() {\n");
-
+        generateInterface(typeStr, methodName);
+        bufferMethods.append("    @Override\n");
+        bufferMethods.append("    public ").append(typeStr).append(" ").append(methodName).append("() {\n");
+        bufferMethods.append("        //TODO\n");
         bufferMethods.append("        return null;\n");
-
         bufferMethods.append("    }\n\n");
+    }
+
+    private void generateInterface(String typeStr,String methodName){
+        methodName = methodName.substring(0, 1).toUpperCase() + methodName.substring(1);
+        String interfaceName = methodName + "Interface";
+
+        if (bufferImplements.isEmpty()){
+            bufferImplements.append(interfaceName);
+        } else {
+            bufferImplements.append(", ").append(interfaceName);
+        }
+
+        bufferInterfaces.append("public interface ").append(interfaceName).append(" {\n");
+        bufferInterfaces.append("    ").append(typeStr).append(" ").append(methodName).append("();\n");
+        bufferInterfaces.append("}\n\n");
     }
 }
