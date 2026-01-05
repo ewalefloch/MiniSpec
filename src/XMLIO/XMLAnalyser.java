@@ -1,13 +1,15 @@
 package XMLIO;
 
 import javax.xml.parsers.*;
+
+import metaModel.minispec.Attribute;
+import metaModel.minispec.Model;
 import org.w3c.dom.*;
 
-import metaModel.*;
-import metaModel.Entity;
-import metaModel.type.*;
-import metaModel.type.collection.*;
-import metaModel.visiteur.MinispecElement;
+import metaModel.minispec.Entity;
+import metaModel.minispec.type.*;
+import metaModel.minispec.type.collection.*;
+import metaModel.minispec.visiteur.MinispecElement;
 import org.xml.sax.SAXException;
 
 import java.io.*;
@@ -69,7 +71,9 @@ public class XMLAnalyser {
 
 		if (e.hasAttribute("model")) {
 			MinispecElement model = minispecElementFromXmlElement(this.xmlElementIndex.get(e.getAttribute("model")));
-			if (model instanceof Model) ((Model) model).addEntity(entity);
+			if (model instanceof Model){
+				((Model) model).addEntity(entity);
+			}
 		}
 
 		return entity;
@@ -96,7 +100,8 @@ public class XMLAnalyser {
 			MinispecElement target = minispecElementFromXmlElement(this.xmlElementIndex.get(refId));
 			if(target instanceof Entity) return new ResolvedReference((Entity)target);
 		}
-		return new UnresolvedReference(e.getAttribute("name"));
+		UnresolvedReference ref = new UnresolvedReference(e.getAttribute("name"));
+		return ref;
 	}
 
 	// --- GESTION DES COLLECTIONS  ---
@@ -198,9 +203,7 @@ public class XMLAnalyser {
 
 		secondRound(e);
 
-		Model model = (Model) this.minispecIndex.get(e.getAttribute("model"));
-
-		return model;
+        return (Model) this.minispecIndex.get(e.getAttribute("model"));
 	}
 
 	public Model getModelFromInputStream(InputStream stream) {

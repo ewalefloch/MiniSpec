@@ -6,11 +6,10 @@ import generator.JavaGenerator;
 import org.junit.jupiter.api.Test;
 
 import XMLIO.XMLAnalyser;
-import metaModel.Model;
+import metaModel.minispec.Model;
 
 class JavaGeneratorTest {
 
-    private final generation.FileGenerator fileGenerator = new generation.FileGenerator();
     private final StringBuilder file = new StringBuilder("<Root model=\"#1\">\n" +
             "    <Model id=\"#1\" />\n" +
             "    <Entity id=\"#2\" model=\"#1\" name=\"Satellite\" />\n" +
@@ -43,7 +42,6 @@ class JavaGeneratorTest {
         assertTrue(generatedCode.contains("Integer id;"), "L'attribut id doit être généré");
         assertTrue(generatedCode.contains("Satellite() { }"), "Le constructeur vide doit être généré");
 
-        fileGenerator.generateFile("Satellite", generatedCode, "./output");
     }
 
     @Test

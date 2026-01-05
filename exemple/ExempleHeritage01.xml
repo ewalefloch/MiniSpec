@@ -15,7 +15,6 @@
 
     <Array id="#ArrayStation" of="#RefStation" size="10" />
 
-
     <Attribute id="#A1" entity="#10" name="mesSatellites" type="#ListSat" />
     <Attribute id="#A2" entity="#10" name="nom" type="String" />
 

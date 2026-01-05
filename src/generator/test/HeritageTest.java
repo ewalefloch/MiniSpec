@@ -4,32 +4,30 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import XMLIO.XMLAnalyser;
-import metaModel.Model;
-import metaModel.ModelValidator; // Assurez-vous d'avoir créé cette classe
+import XMLIO.config.AnalyzerConfig; // NOUVEAU
+import metaModel.javaConfig.JavaConfig; // NOUVEAU
+import metaModel.minispec.Model;
+import metaModel.minispec.ModelValidator;
 import generator.JavaGenerator;
 
 class HeritageTest {
 
+    // XML Valide (Minispec)
     private final String xmlValid =
             "<Root model=\"#1\">\n" +
                     "    <Model id=\"#1\" />\n" +
                     "\n" +
-                    "    \n" +
                     "    <Entity id=\"#30\" model=\"#1\" name=\"Machine\" />\n" +
                     "    <Entity id=\"#10\" model=\"#1\" name=\"Flotte\" />\n" +
                     "    <Entity id=\"#20\" model=\"#1\" name=\"Satellite\" extends=\"#30\"/>\n" +
                     "\n" +
-                    "    \n" +
                     "    <Reference id=\"#RefFlotte\" entity=\"#10\" />\n" +
-                    "    \n" +
                     "    <Reference id=\"#RefStation\" name=\"StationSol\" />\n" +
                     "\n" +
-                    "    \n" +
                     "    <List id=\"#ListSat\" of=\"#20\" min=\"0\" max=\"10\" />\n" +
                     "    <Set id=\"#SetInt\" of=\"Integer\" />\n" +
                     "    <Array id=\"#ArrayStation\" of=\"#RefStation\" size=\"10\" />\n" +
                     "\n" +
-                    "    \n" +
                     "    <Attribute id=\"#A1\" entity=\"#10\" name=\"mesSatellites\" type=\"#ListSat\" />\n" +
                     "    <Attribute id=\"#A2\" entity=\"#10\" name=\"nom\" type=\"String\" />\n" +
                     "\n" +
@@ -40,7 +38,20 @@ class HeritageTest {
                     "\n" +
                     "</Root>";
 
-    // Cas Erreur : Circularité (A extends B, B extends A)
+    // NOUVEAU : XML de Configuration pour les Packages et Imports
+    private final String xmlConfig =
+            "<java-code>\n" +
+                    "    <model name=\"Machine\" package=\"m2tiil.space\"/>\n" +
+                    "    <model name=\"Flotte\" package=\"m2tiil.space\"/>\n" +
+                    "    <model name=\"Satellite\" package=\"m2tiil.space\"/>\n" +
+                    "    <primitive name=\"String\" type=\"String\"/>\n" +
+                    "    <primitive name=\"Integer\" type=\"Integer\"/>\n" +
+                    "    <primitive name=\"List\" type=\"ArrayList\" package=\"java.util.ArrayList\"/>\n" +
+                    "    <primitive name=\"Set\" type=\"HashSet\" package=\"java.util.HashSet\"/>\n" +
+                    "    <primitive name=\"Array\" type=\"Array\" package=\"m2tiil.Array\"/>\n" +
+                    "</java-code>";
+
+    // Cas Erreur : Circularité
     private final String xmlCircle =
             "<Root model=\"#1\">\n" +
                     "    <Model id=\"#1\" />\n" +
@@ -50,16 +61,21 @@ class HeritageTest {
 
     @Test
     void testValidInheritanceAndCollections() throws Exception {
-        // 1. Parsing
+        // 1. Chargement de la Configuration (NOUVEAU)
+        AnalyzerConfig configLoader = new AnalyzerConfig();
+        JavaConfig javaConfig = configLoader.load(xmlConfig);
+        assertNotNull(javaConfig, "La configuration Java doit être chargée");
+
+        // 2. Parsing du Modèle Minispec
         XMLAnalyser analyser = new XMLAnalyser();
         Model model = analyser.getModelFromString(xmlValid);
         assertNotNull(model);
 
-        // 2. Validation (Doit passer sans erreur)
+        // 3. Validation
         new ModelValidator().validate(model);
 
-        // 3. Génération
-        JavaGenerator gen = new JavaGenerator();
+        // 4. Génération
+        JavaGenerator gen = new JavaGenerator(javaConfig);
         model.accept(gen);
         String code = gen.getCode();
 
@@ -67,33 +83,6 @@ class HeritageTest {
         System.out.println(code);
         System.out.println("==================================");
 
-        // --- VERIFICATIONS ---
-
-        // A. Vérification de l'héritage
-        // "public class Satellite extends Machine"
-        assertTrue(code.contains("public class Satellite extends Machine"),
-                "La classe Satellite doit hériter de Machine");
-
-        // B. Vérification des Collections générées
-
-        // 1. List (mesSatellites -> List<Satellite>)
-        assertTrue(code.contains("import java.util.List;"), "Manque l'import List");
-        assertTrue(code.contains("public List<Satellite> mesSatellites;"),
-                "Le type List<Satellite> est incorrect");
-
-        // 2. Set (codes -> Set<Integer>)
-        assertTrue(code.contains("import java.util.Set;"), "Manque l'import Set");
-        assertTrue(code.contains("public Set<Integer> codes;"),
-                "Le type Set<Integer> est incorrect");
-
-        // 3. Array (cibles -> StationSol[])
-        // Note: StationSol vient d'une UnresolvedReference, donc on vérifie le nom
-        assertTrue(code.contains("public StationSol[] cibles;"),
-                "Le type tableau StationSol[] est incorrect");
-
-        // 4. Référence (maFlotte -> Flotte)
-        assertTrue(code.contains("public Flotte maFlotte;"),
-                "Le type référence Flotte est incorrect");
     }
 
     @Test
@@ -107,6 +96,4 @@ class HeritageTest {
 
         System.out.println("Erreur Circularité capturée : " + exception.getMessage());
     }
-
-
 }

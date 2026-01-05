@@ -1,0 +1,10 @@
+<java-code>
+    <model name="Meuble" package="m2tiil.meuble"/>
+    <model name="Bataille" package="m2tiil.batailleNavale"/>
+    <primitive name="String" type="String"/>
+    <primitive name="Integer" type="Integer"/>
+    <primitive name="List" type="ArrayList" package="Java.util.ArrayList"/>
+    <primitive name="Array" type="Array" package="m2tiil.Array"/>
+    <primitive name="Set" type="HashSet" package="Java.util.HashSet"/>
+    <primitive name="Bag" type="Bag" package="m2tiil.Bag"/>
+</java-code>

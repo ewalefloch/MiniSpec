@@ -7,22 +7,22 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import metaModel.type.ArrayType;
-import metaModel.type.ResolvedReference;
-import metaModel.type.SimpleType;
-import metaModel.type.UnresolvedReference;
-import metaModel.type.collection.BagType;
-import metaModel.type.collection.CollectionType;
-import metaModel.type.collection.ListType;
-import metaModel.type.collection.SetType;
+import metaModel.minispec.type.ArrayType;
+import metaModel.minispec.type.ResolvedReference;
+import metaModel.minispec.type.SimpleType;
+import metaModel.minispec.type.UnresolvedReference;
+import metaModel.minispec.type.collection.BagType;
+import metaModel.minispec.type.collection.CollectionType;
+import metaModel.minispec.type.collection.ListType;
+import metaModel.minispec.type.collection.SetType;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import metaModel.Attribute;
-import metaModel.Entity;
-import metaModel.Model;
-import metaModel.visiteur.Visitor;
+import metaModel.minispec.Attribute;
+import metaModel.minispec.Entity;
+import metaModel.minispec.Model;
+import metaModel.minispec.visiteur.Visitor;
 
 public class XMLSerializer implements Visitor {
 	List<Element> elements;

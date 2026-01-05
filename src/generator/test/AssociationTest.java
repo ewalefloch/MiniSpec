@@ -3,13 +3,12 @@ package generator.test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import generator.JavaGenerator;
+import metaModel.minispec.Entity;
 import org.junit.jupiter.api.Test;
 import XMLIO.XMLAnalyser;
-import metaModel.Model;
+import metaModel.minispec.Model;
 
 class AssociationTest {
-
-    private final generation.FileGenerator fileGenerator = new generation.FileGenerator();
 
     private final StringBuilder file = new StringBuilder("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" +
             "<Root model=\"#1\">\n" +
@@ -33,6 +32,8 @@ class AssociationTest {
         XMLAnalyser analyser = new XMLAnalyser();
         Model model = analyser.getModelFromString(file.toString());
 
+
+
         assertNotNull(model);
         assertEquals(2, model.getEntities().size());
 
@@ -47,12 +48,9 @@ class AssociationTest {
         assertTrue(generatedCode.contains("public Flotte parent;"),
                 "L'association simple devrait générer un attribut du type 'Flotte'");
 
-        model.getEntities().forEach(e ->
-                fileGenerator.generateFile(e.getName(), getSingleEntityCode(e, generator), "./output")
-        );
     }
 
-    private String getSingleEntityCode(metaModel.Entity e, JavaGenerator mainGen) {
+    private String getSingleEntityCode(Entity e, JavaGenerator mainGen) {
         JavaGenerator tempGen = new JavaGenerator();
         e.accept(tempGen);
         return tempGen.getCode();

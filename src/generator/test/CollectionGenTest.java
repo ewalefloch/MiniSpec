@@ -6,14 +6,14 @@ import generator.JavaGenerator;
 import org.junit.jupiter.api.Test;
 
 import XMLIO.XMLAnalyser;
-import metaModel.Model;
-import metaModel.Entity;
-import metaModel.Attribute;
-import metaModel.type.Type;
-import metaModel.type.SimpleType;
-import metaModel.type.ResolvedReference;
-import metaModel.type.collection.ListType;
-import metaModel.type.collection.SetType;
+import metaModel.minispec.Model;
+import metaModel.minispec.Entity;
+import metaModel.minispec.Attribute;
+import metaModel.minispec.type.Type;
+import metaModel.minispec.type.SimpleType;
+import metaModel.minispec.type.ResolvedReference;
+import metaModel.minispec.type.collection.ListType;
+import metaModel.minispec.type.collection.SetType;
 
 public class CollectionGenTest {
 

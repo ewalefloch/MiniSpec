@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import metaModel.Model;
+import metaModel.minispec.Model;
 
 class XMLAnalyserTest {
 

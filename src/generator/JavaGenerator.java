@@ -1,16 +1,20 @@
 package generator;
 
-import metaModel.Attribute;
-import metaModel.Entity;
-import metaModel.Model;
-import metaModel.type.*;
-import metaModel.type.collection.*;
-import metaModel.visiteur.Visitor;
+import metaModel.javaConfig.JavaConfig;
+import metaModel.javaConfig.PrimitiveConfig;
+import metaModel.minispec.Attribute;
+import metaModel.minispec.Entity;
+import metaModel.minispec.Model;
+import metaModel.minispec.type.*;
+import metaModel.minispec.type.collection.*;
+import metaModel.minispec.visiteur.Visitor;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class JavaGenerator implements Visitor {
+
+    private final JavaConfig config;
 
     private final StringBuilder bufferCode = new StringBuilder();
 
@@ -18,7 +22,16 @@ public class JavaGenerator implements Visitor {
     private final StringBuilder bufferGetSet = new StringBuilder();
     private final StringBuilder bufferImport = new StringBuilder();
 
-    private final Set<String> addedImports = new HashSet<>();
+    private final Set<String> currentImports = new HashSet<>();
+
+    public JavaGenerator(JavaConfig config) {
+        this.config = config;
+    }
+
+    public JavaGenerator() {
+        this.config = null;
+    }
+
 
     public String getCode() {
         return bufferCode.toString();
@@ -36,11 +49,22 @@ public class JavaGenerator implements Visitor {
         bufferAttributes.setLength(0);
         bufferGetSet.setLength(0);
         bufferImport.setLength(0);
-        addedImports.clear();
 
         for (Attribute a : e.getAttributes()) {
             a.accept(this);
         }
+
+        String currentPackage = (config != null) ? config.getPackageForModel(e.getName()) : "";
+
+        if (currentPackage != null && !currentPackage.isEmpty()) {
+            bufferCode.append("package ").append(currentPackage).append(";\n\n");
+        }
+
+        for (String imp : currentImports) {
+            bufferCode.append("import ").append(imp).append(";\n");
+        }
+
+        if (!currentImports.isEmpty()) bufferCode.append("\n");
 
         if (!bufferImport.isEmpty()) {
             bufferCode.append(bufferImport).append("\n");
@@ -74,43 +98,46 @@ public class JavaGenerator implements Visitor {
 
     @Override
     public void visitSimpleType(SimpleType t) {
-        bufferAttributes.append(t.getName());
+        String javaType = getConfiguredTypeAndImport(t.getName());
+        bufferAttributes.append(javaType);
     }
 
     @Override
     public void visitArrayType(ArrayType t) {
+        String javaType = getConfiguredTypeAndImport("Array");
+        bufferAttributes.append(javaType).append("<");
         if (t.getBaseType() != null) t.getBaseType().accept(this);
-        bufferAttributes.append("[]");
+        bufferAttributes.append(">");
     }
 
     @Override
     public void visitListType(ListType t) {
-        addImport("java.util.List");
-        bufferAttributes.append("List<");
+        String javaType = getConfiguredTypeAndImport("List");
+        bufferAttributes.append(javaType).append("<");
         if (t.getElementType() != null) t.getElementType().accept(this);
         bufferAttributes.append(">");
     }
 
     @Override
     public void visitSetType(SetType t) {
-        addImport("java.util.Set");
-        bufferAttributes.append("Set<");
+        String javaType = getConfiguredTypeAndImport("Set");
+        bufferAttributes.append(javaType).append("<");
         if (t.getElementType() != null) t.getElementType().accept(this);
         bufferAttributes.append(">");
     }
 
     @Override
     public void visitBagType(BagType t) {
-        addImport("java.util.List");
-        bufferAttributes.append("List<");
+        String javaType = getConfiguredTypeAndImport("Bag");
+        bufferAttributes.append(javaType).append("<");
         if (t.getElementType() != null) t.getElementType().accept(this);
         bufferAttributes.append(">");
     }
 
     @Override
     public void visitCollectionType(CollectionType t) {
-        addImport("java.util.Collection");
-        bufferAttributes.append("Collection<");
+        String javaType = getConfiguredTypeAndImport("List");
+        bufferAttributes.append(javaType).append("<");
         if (t.getElementType() != null) t.getElementType().accept(this);
         bufferAttributes.append(">");
     }
@@ -127,11 +154,17 @@ public class JavaGenerator implements Visitor {
 
     // --- OUTILS ---
 
-    private void addImport(String importName) {
-        if (!addedImports.contains(importName)) {
-            bufferImport.append("import ").append(importName).append(";\n");
-            addedImports.add(importName);
+    private String getConfiguredTypeAndImport(String minispecType) {
+        if (config == null) return minispecType;
+
+        PrimitiveConfig pc = config.getPrimitive(minispecType);
+        if (pc != null) {
+            if (pc.getPackageName() != null && !pc.getPackageName().isEmpty()) {
+                this.currentImports.add(pc.getPackageName());
+            }
+            return pc.getJavaType();
         }
+        return minispecType;
     }
 
     private void generateGetterSetter(Attribute a) {
