@@ -84,7 +84,9 @@ public class XMLAnalyser {
 
 		// Résolution du type via ID ou Nom
 		attribute.setType(resolveType(e.getAttribute("type")));
-
+		if (e.hasAttribute("default")) {
+			attribute.setInitialValue(e.getAttribute("default"));
+		}
 		String entityId = e.getAttribute("entity");
 		MinispecElement parent = minispecElementFromXmlElement(this.xmlElementIndex.get(entityId));
 		if (parent instanceof Entity) {

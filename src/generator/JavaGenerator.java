@@ -21,6 +21,7 @@ public class JavaGenerator implements Visitor {
     public final StringBuilder bufferAttributes = new StringBuilder();
     private final StringBuilder bufferGetSet = new StringBuilder();
     private final StringBuilder bufferImport = new StringBuilder();
+    private final StringBuilder bufferMethods = new StringBuilder();
 
     private final Set<String> currentImports = new HashSet<>();
 
@@ -78,6 +79,12 @@ public class JavaGenerator implements Visitor {
         bufferCode.append(bufferAttributes);
         bufferCode.append("\n    public ").append(e.getName()).append("() { }\n");
         bufferCode.append(bufferGetSet);
+
+        if (!bufferMethods.isEmpty()) {
+            bufferCode.append("\n    // --- Méthodes générées pour les valeurs par défaut ---\n");
+            bufferCode.append(bufferMethods);
+        }
+
         bufferCode.append("}\n\n");
     }
 
@@ -89,7 +96,15 @@ public class JavaGenerator implements Visitor {
         } else {
             bufferAttributes.append("void");
         }
-        bufferAttributes.append(" ").append(e.getName()).append(";\n");
+        bufferAttributes.append(" ").append(e.getName());
+        if (e.getInitialValue() != null && !e.getInitialValue().isEmpty()) {
+            String val = e.getInitialValue();
+            bufferAttributes.append(" = ").append(val);
+            if (val.contains("(") && val.endsWith(")") && !val.trim().startsWith("new ")) {
+                generateStubMethod(e, val);
+            }
+        }
+        bufferAttributes.append(";\n");
 
         generateGetterSetter(e);
     }
@@ -184,5 +199,21 @@ public class JavaGenerator implements Visitor {
         bufferGetSet.append("\n    public void set").append(capName).append("(").append(typeStr).append(" ").append(name).append(") {\n")
                 .append("        this.").append(name).append(" = ").append(name).append(";\n")
                 .append("    }\n");
+    }
+
+    private void generateStubMethod(Attribute a, String callStr) {
+        String methodName = callStr.substring(0, callStr.indexOf('(')).trim();
+
+        JavaGenerator typeGen = new JavaGenerator(this.config);
+        if (a.getType() != null) {
+            a.getType().accept(typeGen);
+        }
+        String typeStr = typeGen.bufferAttributes.toString();
+
+        bufferMethods.append("    private ").append(typeStr).append(" ").append(methodName).append("() {\n");
+
+        bufferMethods.append("        return null;\n");
+
+        bufferMethods.append("    }\n\n");
     }
 }
