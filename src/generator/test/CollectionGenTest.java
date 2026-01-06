@@ -46,15 +46,12 @@ public class CollectionGenTest {
 
     @Test
     void testCollectionsAndTypes() {
-        // 1. Parsing
         XMLAnalyser analyser = new XMLAnalyser();
         Model model = analyser.getModelFromString(xmlContent.toString());
         assertNotNull(model);
 
         Entity flotte = findEntity(model, "Flotte");
         Entity satellite = findEntity(model, "Satellite");
-
-        // --- VERIFICATIONS METAMODELE ---
 
         //SimpleType (String)
         Attribute attNom = findAttribute(flotte, "nom");
@@ -75,8 +72,6 @@ public class CollectionGenTest {
         Type baseTypeInt = ((SetType) attCodes.getType()).getElementType();
         assertInstanceOf(SimpleType.class, baseTypeInt);
         assertEquals("Integer", baseTypeInt.getName());
-
-        // --- VERIFICATION GENERATION CODE ---
 
         JavaGenerator generator = new JavaGenerator();
         model.accept(generator);

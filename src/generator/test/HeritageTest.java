@@ -7,7 +7,7 @@ import XMLIO.XMLAnalyser;
 import XMLIO.config.AnalyzerConfig; // NOUVEAU
 import metaModel.javaConfig.JavaConfig; // NOUVEAU
 import metaModel.minispec.Model;
-import metaModel.minispec.ModelValidator;
+import metaModel.minispec.modelValidator.ModelValidatorCheckCircularity;
 import generator.JavaGenerator;
 
 class HeritageTest {
@@ -71,7 +71,7 @@ class HeritageTest {
         assertNotNull(model);
 
         // 3. Validation
-        new ModelValidator().validate(model);
+        new ModelValidatorCheckCircularity().validate(model);
 
         // 4. Génération
         JavaGenerator gen = new JavaGenerator(javaConfig);
@@ -90,7 +90,7 @@ class HeritageTest {
         Model model = analyser.getModelFromString(xmlCircle);
 
         Exception exception = assertThrows(Exception.class, () -> {
-            new ModelValidator().validate(model);
+            new ModelValidatorCheckCircularity().validate(model);
         });
 
         System.out.println("Erreur Circularité capturée : " + exception.getMessage());

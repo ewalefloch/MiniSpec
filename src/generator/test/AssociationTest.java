@@ -3,10 +3,13 @@ package generator.test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import generator.JavaGenerator;
+import metaModel.minispec.Attribute;
 import metaModel.minispec.Entity;
 import org.junit.jupiter.api.Test;
 import XMLIO.XMLAnalyser;
 import metaModel.minispec.Model;
+
+import java.util.Objects;
 
 class AssociationTest {
 
@@ -35,6 +38,14 @@ class AssociationTest {
         assertNotNull(model);
         assertEquals(2, model.getEntities().size());
 
+        Attribute attrParent = findAttribute(Objects.requireNonNull(model.getEntities().stream()
+                .filter(e -> e.getName().equals("Satellite"))
+                .findFirst()
+                .orElse(null)), "parent");
+
+        assertNotNull(attrParent, "L'attribut 'parent' doit exister dans l'entité 'Satellite'");
+        assertEquals("Flotte", attrParent.getType().getName(), "Le type de l'attribut 'parent' doit être 'Flotte'");
+
         JavaGenerator generator = new JavaGenerator();
         model.accept(generator);
         String generatedCode = generator.getCode();
@@ -44,5 +55,13 @@ class AssociationTest {
         System.out.println("----------------------------------------");
 
     }
+
+    private Attribute findAttribute(Entity entity, String attributeName) {
+        return entity.getAttributes().stream()
+                .filter(attr -> attr.getName().equals(attributeName))
+                .findFirst()
+                .orElse(null);
+    }
+
 
 }

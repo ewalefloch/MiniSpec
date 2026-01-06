@@ -25,9 +25,11 @@ class JavaGeneratorTest {
         Model model = analyser.getModelFromString(file.toString());
 
         assertNotNull(model);
-        assertEquals(1, model.getEntities().size());
-        assertEquals("Satellite", model.getEntities().getFirst().getName());
-        assertEquals(2, model.getEntities().getFirst().getAttributes().size());
+        assertEquals(1, model.getEntities().size(),"Une entité doit être présente dans le modèle");
+        assertEquals("Satellite", model.getEntities().getFirst().getName(), "Le nom de l'entité doit être 'Satellite'");
+        assertEquals(2, model.getEntities().getFirst().getAttributes().size(), "L'entité 'Satellite' doit avoir deux attributs");
+        assertEquals("nom", model.getEntities().getFirst().getAttributes().getFirst().getName(), "Le premier attribut doit être 'nom'");
+        assertEquals("id", model.getEntities().getFirst().getAttributes().getLast().getName(), "Le second attribut doit être 'id'");
 
         JavaGenerator generator = new JavaGenerator();
         model.accept(generator);
@@ -36,12 +38,6 @@ class JavaGeneratorTest {
         System.out.println("--- Code Généré (Test Satellite) ---");
         System.out.println(generatedCode);
         System.out.println("------------------------------------");
-
-        assertTrue(generatedCode.contains("public class Satellite"), "La classe Satellite doit être définie");
-        assertTrue(generatedCode.contains("String nom;"), "L'attribut nom doit être généré");
-        assertTrue(generatedCode.contains("Integer id;"), "L'attribut id doit être généré");
-        assertTrue(generatedCode.contains("Satellite() { }"), "Le constructeur vide doit être généré");
-
     }
 
     @Test

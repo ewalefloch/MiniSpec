@@ -1,9 +1,14 @@
-package metaModel.minispec;
+package metaModel.minispec.modelValidator;
+
+import metaModel.minispec.Entity;
+import metaModel.minispec.Model;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class ModelValidator {
+public class ModelValidatorCheckCircularity implements ModelValidator {
+
+    @Override
     public void validate(Model model) throws Exception {
         for (Entity e : model.getEntities()) {
             checkCircularity(e);
